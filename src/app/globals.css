@@ -1,3 +1,72 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+:root {
+    --neutral--white: #fff;
+    --neutral--black: #101010;
+    --primary--default: #1d4339;
+    --accent--gold--light: #e9cc95;
+    --neutral--dark-grey: #5a5a5a;
+    --neutral--grey: #9a9a9a;
+    --primary--focused: #285e50;
+    --neutral--light-grey: #e9e9e9;
+    --accent--light: var(--accent--mid-opal);
+    --opal: #d4e2dd;
+    --green--100: #f4f8f7;
+    --primary--selected: #347866;
+    --accent--mid-opal: #d4e2dd4d;
+    --accent--mid: #3f937c;
+    --relume-library-lite--rl-black: black;
+    --relume-library-lite--rl-white: white;
+    --radiant-ui-components-library-marketplace--color--body-font-dark: #6d6d6d;
+    --gold: #d7a13b;
+    --radiant-ui-components-library-marketplace--color--white: white;
+    --radiant-ui-components-library-marketplace--color--heading-dark: #150438;
+    --radiant-ui-components-library-marketplace--linear-color-three: #e0ecff;
+    --radiant-ui-components-library-marketplace--color--button-background-dark: #131218;
+    --radiant-ui-components-library-marketplace--color--theme-color: #116df8;
+    --untitled-ui--gray600: #475467
+}
+
+@font-face {
+    font-family: Lato – Solace;
+    src: url(https://cdn.prod.website-files.com/632a21d0ec93a082b11988a0/632a22931626a479c4f9e3f4_Lato.woff2)format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: Lato – Solace;
+    src: url(https://cdn.prod.website-files.com/632a21d0ec93a082b11988a0/632a22a258ca4b4f3882f035_Lato%20700.woff2)format("woff2");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: Lato – Solace;
+    src: url(https://cdn.prod.website-files.com/632a21d0ec93a082b11988a0/635154fb7d459e90e264a888_S6u9w4BMUTPHh7USSwiPGQ3q5d0.woff2)format("woff2");
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap
+}
+
+body{
+    background-color: var(--neutral--white);
+    color: var(--neutral--black);
+    font-family: Lato – Solace,sans-serif;
+    font-size: 1rem;
+    line-height: 1.5
+}
+
+
+h1 {
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.1
+}
