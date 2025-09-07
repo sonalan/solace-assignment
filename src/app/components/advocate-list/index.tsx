@@ -8,33 +8,29 @@ function AdvocateList() {
     const [advocates, setAdvocates] = useState<Advocate[]>([]);
     const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(10);
 
     useEffect(() => {
         console.log("fetching advocates...");
         fetch("/api/advocates").then((response) => {
-        response.json().then((jsonResponse) => {
+          response.json().then((jsonResponse) => {
             setAdvocates(jsonResponse.data);
             setFilteredAdvocates(jsonResponse.data);
-        });
+          });
         });
     }, []);
 
     const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value)
+        const newSearchTerm = e.target.value;
+        setSearchTerm(newSearchTerm);
 
         console.log("filtering advocates...");
-        const filteredAdvocates = advocates.filter((advocate) => {
-        return (
-            advocate.firstName.includes(searchTerm) ||
-            advocate.lastName.includes(searchTerm) ||
-            advocate.city.includes(searchTerm) ||
-            advocate.degree.includes(searchTerm) ||
-            advocate.specialties.includes(searchTerm) ||
-            advocate.yearsOfExperience.toString().includes(searchTerm)
-        );
-        });
-
-        setFilteredAdvocates(filteredAdvocates);
+        fetch(`/api/advocates?page_size={pageSize}0&page={page}&search_term=${encodeURIComponent(newSearchTerm)}`)
+            .then((response) => response.json())
+            .then((jsonResponse) => {
+                setFilteredAdvocates(jsonResponse.data);
+            });
     };
 
   const onReset = () => {
