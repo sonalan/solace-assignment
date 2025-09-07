@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Advocate from "../types/advocate"
+import AdvocateList from "./components/advocate-list";
 
 export default function Home() {
   const [advocates, setAdvocates] = useState<Advocate[]>([]);
@@ -43,12 +44,11 @@ export default function Home() {
   };
 
   return (
-    <main style={{ margin: "24px" }}>
-      <h1>Solace Advocates</h1>
-      <br />
-      <br />
-      <div>
-        <p>Search</p>
+    <main className="m-6">
+      <h1 className="mb-4">Solace Advocates</h1>
+      <AdvocateList />
+      {/* <div>
+        <h2 className="mb-4">Search</h2>
         <p>
           Searching for: <span id="search-term">{searchTerm}</span>
         </p>
@@ -88,7 +88,7 @@ export default function Home() {
             );
           })}
         </tbody>
-      </table>
+      </table> */}
     </main>
   );
 }
