@@ -1,6 +1,7 @@
+import { NextRequest } from "next/server";
+import { sql, ilike, or, eq } from "drizzle-orm";
 import db from "../../../db";
 import { advocates } from "../../../db/schema";
-// import { advocateData } from "../../../db/seed/advocates";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -9,11 +10,53 @@ export async function GET(request: NextRequest) {
   const page = parseInt(searchParams.get('page') || '1');
 
   const offset = (page -1) * pageSize
+
+  let queryBuilder = db.select().from(advocates);
   
-  // Uncomment this line to use a database
-  const data = await db.select().from(advocates);
-
-  // const data = advocateData;
-
-  return Response.json({ data });
+    if (searchTerm) {
+      queryBuilder = queryBuilder.where(
+        or(
+          ilike(advocates.firstName, `%${searchTerm}%`),
+          ilike(advocates.lastName, `%${searchTerm}%`),
+          ilike(advocates.city, `%${searchTerm}%`),
+          ilike(advocates.degree, `%${searchTerm}%`),
+          ilike(advocates.specialties, `%${searchTerm}%`),
+          sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${'%' + searchTerm + '%'}`
+        )
+      );
+    }
+  
+    // Add pagination and execute
+    const data = await queryBuilder.limit(pageSize).offset(offset);
+  
+  
+    // Get total count for pagination metadata
+    let countQuery = db.select({ count: sql<number>`count(*)` }).from(advocates);
+    if (searchTerm) {
+      countQuery = countQuery.where(
+        or(
+          ilike(advocates.firstName, `%${searchTerm}%`),
+          ilike(advocates.lastName, `%${searchTerm}%`),
+          ilike(advocates.city, `%${searchTerm}%`),
+          ilike(advocates.degree, `%${searchTerm}%`),
+          ilike(advocates.specialties, `%${searchTerm}%`),
+          sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${`%${searchTerm}%`}`
+        )
+      );
+    }
+  
+    const [{ count: totalCount }] = await countQuery;
+    const totalPages = Math.ceil(totalCount / pageSize);
+  
+    return Response.json({ 
+      data,
+      pagination: {
+        page,
+        pageSize,
+        totalCount,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      }
+    });
 }
