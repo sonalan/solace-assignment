@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
         sql`CAST(${advocates.specialties} AS TEXT) ILIKE ${`%${searchTerm}%`}`,
         isNaN(Number(searchTerm)) 
           ? sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${'%' + searchTerm + '%'}`
-          : eq(advocates.yearsOfExperience, Number(searchTerm))
+          : eq(advocates.yearsOfExperience, Number(searchTerm)),
+        sql`CAST(${advocates.phoneNumber} AS TEXT) ILIKE ${`%${searchTerm}%`}`
       )
     );
   }
@@ -44,7 +45,8 @@ export async function GET(request: NextRequest) {
         sql`CAST(${advocates.specialties} AS TEXT) ILIKE ${`%${searchTerm}%`}`,
         isNaN(Number(searchTerm)) 
           ? sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${'%' + searchTerm + '%'}`
-          : eq(advocates.yearsOfExperience, Number(searchTerm))
+          : eq(advocates.yearsOfExperience, Number(searchTerm)),
+        sql`CAST(${advocates.phoneNumber} AS TEXT) ILIKE ${`%${searchTerm}%`}`
       )
     );
   }
