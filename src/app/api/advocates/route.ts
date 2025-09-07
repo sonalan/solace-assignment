@@ -13,50 +13,50 @@ export async function GET(request: NextRequest) {
 
   let queryBuilder = db.select().from(advocates);
   
-    if (searchTerm) {
-      queryBuilder = queryBuilder.where(
-        or(
-          ilike(advocates.firstName, `%${searchTerm}%`),
-          ilike(advocates.lastName, `%${searchTerm}%`),
-          ilike(advocates.city, `%${searchTerm}%`),
-          ilike(advocates.degree, `%${searchTerm}%`),
-          ilike(advocates.specialties, `%${searchTerm}%`),
-          sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${'%' + searchTerm + '%'}`
-        )
-      );
+  if (searchTerm) {
+    queryBuilder = queryBuilder.where(
+      or(
+        ilike(advocates.firstName, `%${searchTerm}%`),
+        ilike(advocates.lastName, `%${searchTerm}%`),
+        ilike(advocates.city, `%${searchTerm}%`),
+        ilike(advocates.degree, `%${searchTerm}%`),
+        ilike(advocates.specialties, `%${searchTerm}%`),
+        sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${'%' + searchTerm + '%'}`
+      )
+    );
+  }
+  
+  // Add pagination and execute
+  const data = await queryBuilder.limit(pageSize).offset(offset);
+
+
+  // Get total count for pagination metadata
+  let countQuery = db.select({ count: sql<number>`count(*)` }).from(advocates);
+  if (searchTerm) {
+    countQuery = countQuery.where(
+      or(
+        ilike(advocates.firstName, `%${searchTerm}%`),
+        ilike(advocates.lastName, `%${searchTerm}%`),
+        ilike(advocates.city, `%${searchTerm}%`),
+        ilike(advocates.degree, `%${searchTerm}%`),
+        ilike(advocates.specialties, `%${searchTerm}%`),
+        sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${`%${searchTerm}%`}`
+      )
+    );
+  }
+  
+  const [{ count: totalCount }] = await countQuery;
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  return Response.json({ 
+    data,
+    pagination: {
+      page,
+      pageSize,
+      totalCount,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1
     }
-  
-    // Add pagination and execute
-    const data = await queryBuilder.limit(pageSize).offset(offset);
-  
-  
-    // Get total count for pagination metadata
-    let countQuery = db.select({ count: sql<number>`count(*)` }).from(advocates);
-    if (searchTerm) {
-      countQuery = countQuery.where(
-        or(
-          ilike(advocates.firstName, `%${searchTerm}%`),
-          ilike(advocates.lastName, `%${searchTerm}%`),
-          ilike(advocates.city, `%${searchTerm}%`),
-          ilike(advocates.degree, `%${searchTerm}%`),
-          ilike(advocates.specialties, `%${searchTerm}%`),
-          sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${`%${searchTerm}%`}`
-        )
-      );
-    }
-  
-    const [{ count: totalCount }] = await countQuery;
-    const totalPages = Math.ceil(totalCount / pageSize);
-  
-    return Response.json({ 
-      data,
-      pagination: {
-        page,
-        pageSize,
-        totalCount,
-        totalPages,
-        hasNext: page < totalPages,
-        hasPrev: page > 1
-      }
-    });
+  });
 }
