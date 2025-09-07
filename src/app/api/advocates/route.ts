@@ -20,8 +20,10 @@ export async function GET(request: NextRequest) {
         ilike(advocates.lastName, `%${searchTerm}%`),
         ilike(advocates.city, `%${searchTerm}%`),
         ilike(advocates.degree, `%${searchTerm}%`),
-        ilike(advocates.specialties, `%${searchTerm}%`),
-        sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${'%' + searchTerm + '%'}`
+        sql`CAST(${advocates.specialties} AS TEXT) ILIKE ${`%${searchTerm}%`}`,
+        isNaN(Number(searchTerm)) 
+          ? sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${'%' + searchTerm + '%'}`
+          : eq(advocates.yearsOfExperience, Number(searchTerm))
       )
     );
   }
@@ -39,8 +41,10 @@ export async function GET(request: NextRequest) {
         ilike(advocates.lastName, `%${searchTerm}%`),
         ilike(advocates.city, `%${searchTerm}%`),
         ilike(advocates.degree, `%${searchTerm}%`),
-        ilike(advocates.specialties, `%${searchTerm}%`),
-        sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${`%${searchTerm}%`}`
+        sql`CAST(${advocates.specialties} AS TEXT) ILIKE ${`%${searchTerm}%`}`,
+        isNaN(Number(searchTerm)) 
+          ? sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${'%' + searchTerm + '%'}`
+          : eq(advocates.yearsOfExperience, Number(searchTerm))
       )
     );
   }
