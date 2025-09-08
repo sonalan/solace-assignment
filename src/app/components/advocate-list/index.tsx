@@ -15,6 +15,7 @@ function AdvocateList() {
     }), []);
     const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
     const [page, setPage] = useState(defaultPage);
     const [pageSize, setPageSize] = useState(defaultPageSize);
     const [totalPages, setTotalPages] = useState(1);
@@ -29,6 +30,15 @@ function AdvocateList() {
     // Ref to track the current request
     const abortControllerRef = useRef<AbortController | null>(null);
     
+    // Debounce search term
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearchTerm(searchTerm);
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchTerm]);
+
     const doSearch = useCallback(async () => {
         console.log("searching advocates...");
         
@@ -44,7 +54,7 @@ function AdvocateList() {
         
         try {
             const response = await fetch(
-                `/api/advocates?page_size=${pageSize}&page=${page}&search_term=${encodeURIComponent(searchTerm)}`,
+                `/api/advocates?page_size=${pageSize}&page=${page}&search_term=${encodeURIComponent(debouncedSearchTerm)}`,
                 { signal: abortControllerRef.current.signal }
             );
             
@@ -68,7 +78,7 @@ function AdvocateList() {
         } finally {
             setIsLoading(false);
         }
-    }, [page, searchTerm, pageSize]);
+    }, [page, debouncedSearchTerm, pageSize]);
     
     useEffect(() => {
         console.log("fetching advocates...");
@@ -91,14 +101,13 @@ function AdvocateList() {
     };
 
     const onReset = () => {
-      //console.log(advocates);
       setSearchTerm('');
-      setPageSize(defaultPageSize)
-      setPage(defaultPage)
-      setTotalCount(0)
-      setHasNext(false)
-      setHasPrev(false)
-      doSearch()
+      setDebouncedSearchTerm('');
+      setPageSize(defaultPageSize);
+      setPage(defaultPage);
+      setTotalCount(0);
+      setHasNext(false);
+      setHasPrev(false);
     };
 
     const goToPage = (p: number)=>{
