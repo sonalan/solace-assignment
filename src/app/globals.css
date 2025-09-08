@@ -104,3 +104,11 @@ h2 {
     min-width: 170px;
     font-weight: 700
 }
+
+.pager-button{
+    background-color: var(--accent--mid);
+}
+
+.pager-button:hover{
+    background-color: var(--primary--selected);
+}
