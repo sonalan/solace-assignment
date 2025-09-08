@@ -7,10 +7,12 @@ import Pager from '../pager';
 
 function AdvocateList() {
     // const [advocates, setAdvocates] = useState<Advocate[]>([]);
+    const defaultPage: number = Number(process.env.DEFAULT_PAGE) || 1
+    const defaultPageSize:number =  Number(process.env.DEFAULT_PAGE_SIZE) || 10
     const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
+    const [page, setPage] = useState(defaultPage);
+    const [pageSize, setPageSize] = useState(defaultPageSize);
     const [totalPages, setTotalPages] = useState(1);
     const [totalCount, setTotalCount] = useState(0)
     const [hasNext, setHasNext] = useState(false)
@@ -51,9 +53,8 @@ function AdvocateList() {
     const onReset = () => {
       //console.log(advocates);
       setSearchTerm('');
-      setPageSize(2)
-      setPage(10)
-      setPage(1)
+      setPageSize(defaultPageSize)
+      setPage(defaultPage)
       setTotalCount(0)
       setHasNext(false)
       setHasPrev(false)
