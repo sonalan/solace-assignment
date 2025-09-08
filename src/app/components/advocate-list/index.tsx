@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import SearchForm from './search-form';
 import Advocate from '@/types/advocate';
 import ListTable from './list-table';
@@ -8,9 +8,11 @@ import PageSizer from '../page-sizer';
 
 
 function AdvocateList() {
-    // const [advocates, setAdvocates] = useState<Advocate[]>([]);
-    const defaultPage: number = Number(process.env.DEFAULT_PAGE) || 1
-    const defaultPageSize:number =  Number(process.env.DEFAULT_PAGE_SIZE) || 10
+    // Memoize default values to prevent re-calculation
+    const { defaultPage, defaultPageSize } = useMemo(() => ({
+        defaultPage: Number(process.env.DEFAULT_PAGE) || 1,
+        defaultPageSize: Number(process.env.DEFAULT_PAGE_SIZE) || 10
+    }), []);
     const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(defaultPage);
@@ -21,7 +23,8 @@ function AdvocateList() {
     const [hasPrev, setHasPrev] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
 
-    const pageOptions: number[] = [5, 10,25,50,100]
+    // Memoize page options to prevent re-creation
+    const pageOptions = useMemo(() => [5, 10, 25, 50, 100], []);
     
     // Ref to track the current request
     const abortControllerRef = useRef<AbortController | null>(null);
@@ -116,7 +119,7 @@ function AdvocateList() {
         ( <ListTable advocateList={filteredAdvocates} />)
         }
         <div>
-          <PageSizer pageOptions={pageOptions} selectedOption={defaultPageSize} onChangePageSize={onChangePageSize} />
+          <PageSizer pageOptions={pageOptions} selectedOption={pageSize} onChangePageSize={onChangePageSize} />
         </div>
         <Pager totalPages={totalPages} page={page} pageSize={pageSize} totalCount={totalCount} goToPage={goToPage} hasNext={hasNext} hasPrev={hasPrev} />
     </>
