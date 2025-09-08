@@ -10,7 +10,7 @@ function AdvocateList() {
     const [filteredAdvocates, setFilteredAdvocates] = useState<Advocate[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(2);
+    const [pageSize, setPageSize] = useState(10);
     const [totalPages, setTotalPages] = useState(1);
     const [totalCount, setTotalCount] = useState(0)
     const [hasNext, setHasNext] = useState(false)
@@ -52,7 +52,7 @@ function AdvocateList() {
       //console.log(advocates);
       setSearchTerm('');
       setPageSize(2)
-      setPage(1)
+      setPage(10)
       setPage(1)
       setTotalCount(0)
       setHasNext(false)
@@ -68,9 +68,9 @@ function AdvocateList() {
   return (
     <>
         <SearchForm searchTerm={searchTerm} onSearchChange={onSearchChange} onReset={onReset} />
-        <Pager totalPages={totalPages} page={page} goToPage={goToPage} hasNext={hasNext} hasPrev={hasPrev} />
+        <Pager totalPages={totalPages} page={page} totalCount={totalCount} goToPage={goToPage} hasNext={hasNext} hasPrev={hasPrev} />
         <ListTable advocateList={filteredAdvocates} />
-        <Pager totalPages={totalPages} page={page} goToPage={goToPage} hasNext={hasNext} hasPrev={hasPrev} />
+        <Pager totalPages={totalPages} page={page} totalCount={totalCount} goToPage={goToPage} hasNext={hasNext} hasPrev={hasPrev} />
     </>
   );
 }
