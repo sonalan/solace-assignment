@@ -4,6 +4,7 @@ import Advocate from '@/types/advocate';
 import ListTable from './list-table';
 import Pager from '../pager';
 import Loader from '../loader';
+import PageSizer from '../page-sizer';
 
 
 function AdvocateList() {
@@ -19,6 +20,8 @@ function AdvocateList() {
     const [hasNext, setHasNext] = useState(false)
     const [hasPrev, setHasPrev] = useState(false)
     const [isLoading, setIsLoading] = useState(true)
+
+    const pageOptions: number[] = [5, 10,25,50,100]
     
     useEffect(() => {
         console.log("fetching advocates...");
@@ -70,6 +73,11 @@ function AdvocateList() {
       setPage(p)
     }
 
+    const onChangePageSize = (size: number) =>{
+      setPageSize(size);
+      setPage(defaultPage);
+    }
+
   return (
     <>
         <SearchForm searchTerm={searchTerm} onSearchChange={onSearchChange} onReset={onReset} />
@@ -77,6 +85,9 @@ function AdvocateList() {
         {isLoading ? ( <Loader />) : 
         ( <ListTable advocateList={filteredAdvocates} />)
         }
+        <div>
+          <PageSizer pageOptions={pageOptions} selectedOption={defaultPageSize} onChangePageSize={onChangePageSize} />
+        </div>
         <Pager totalPages={totalPages} page={page} pageSize={pageSize} totalCount={totalCount} goToPage={goToPage} hasNext={hasNext} hasPrev={hasPrev} />
     </>
   );
