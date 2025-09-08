@@ -3,6 +3,7 @@ import SearchForm from './search-form';
 import Advocate from '@/types/advocate';
 import ListTable from './list-table';
 import Pager from '../pager';
+import Loader from '../loader';
 
 
 function AdvocateList() {
@@ -17,6 +18,7 @@ function AdvocateList() {
     const [totalCount, setTotalCount] = useState(0)
     const [hasNext, setHasNext] = useState(false)
     const [hasPrev, setHasPrev] = useState(false)
+    const [isLoading, setIsLoading] = useState(true)
     
     useEffect(() => {
         console.log("fetching advocates...");
@@ -25,6 +27,7 @@ function AdvocateList() {
 
     const doSearch = ()=>{
       console.log("searching advocates...");
+      setIsLoading(true)
       //console.log(`page_size=${pageSize}&page=${page}&search_term=${encodeURIComponent(searchTerm)}`)
       fetch(`/api/advocates?page_size=${pageSize}&page=${page}&search_term=${encodeURIComponent(searchTerm)}`)
             .then((response) => response.json())
@@ -38,6 +41,7 @@ function AdvocateList() {
                 setHasNext(jsonResponse.pagination.hasNext)
                 setHasPrev(jsonResponse.pagination.hasPrev)
                 //setCurrentPage(jsonResponse.pagination.page)
+                setIsLoading(false)
               }
             });
     }
@@ -69,9 +73,11 @@ function AdvocateList() {
   return (
     <>
         <SearchForm searchTerm={searchTerm} onSearchChange={onSearchChange} onReset={onReset} />
-        <Pager totalPages={totalPages} page={page} totalCount={totalCount} goToPage={goToPage} hasNext={hasNext} hasPrev={hasPrev} />
-        <ListTable advocateList={filteredAdvocates} />
-        <Pager totalPages={totalPages} page={page} totalCount={totalCount} goToPage={goToPage} hasNext={hasNext} hasPrev={hasPrev} />
+        <Pager totalPages={totalPages} page={page} pageSize={pageSize} totalCount={totalCount} goToPage={goToPage} hasNext={hasNext} hasPrev={hasPrev} />
+        {isLoading ? ( <Loader />) : 
+        ( <ListTable advocateList={filteredAdvocates} />)
+        }
+        <Pager totalPages={totalPages} page={page} pageSize={pageSize} totalCount={totalCount} goToPage={goToPage} hasNext={hasNext} hasPrev={hasPrev} />
     </>
   );
 }
