@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import SearchForm from './search-form';
 import Advocate from '@/types/advocate';
 import ListTable from './list-table';
@@ -23,31 +23,61 @@ function AdvocateList() {
 
     const pageOptions: number[] = [5, 10,25,50,100]
     
+    // Ref to track the current request
+    const abortControllerRef = useRef<AbortController | null>(null);
+    
+    const doSearch = useCallback(async () => {
+        console.log("searching advocates...");
+        
+        // Cancel previous request if it exists
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        
+        // Create new abort controller for this request
+        abortControllerRef.current = new AbortController();
+        
+        setIsLoading(true);
+        
+        try {
+            const response = await fetch(
+                `/api/advocates?page_size=${pageSize}&page=${page}&search_term=${encodeURIComponent(searchTerm)}`,
+                { signal: abortControllerRef.current.signal }
+            );
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            const jsonResponse = await response.json();
+            
+            setFilteredAdvocates(jsonResponse.data);
+            if (jsonResponse.pagination) {
+                setTotalPages(jsonResponse.pagination.totalPages);
+                setTotalCount(jsonResponse.pagination.totalCount);
+                setHasNext(jsonResponse.pagination.hasNext);
+                setHasPrev(jsonResponse.pagination.hasPrev);
+            }
+        } catch (error) {
+            if (error instanceof Error && error.name !== 'AbortError') {
+                console.error('Search failed:', error);
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    }, [page, searchTerm, pageSize]);
+    
     useEffect(() => {
         console.log("fetching advocates...");
-        doSearch()
-    }, [page, searchTerm, pageSize]);
-
-    const doSearch = ()=>{
-      console.log("searching advocates...");
-      setIsLoading(true)
-      //console.log(`page_size=${pageSize}&page=${page}&search_term=${encodeURIComponent(searchTerm)}`)
-      fetch(`/api/advocates?page_size=${pageSize}&page=${page}&search_term=${encodeURIComponent(searchTerm)}`)
-            .then((response) => response.json())
-            .then((jsonResponse) => {
-                setFilteredAdvocates(jsonResponse.data);
-                if (jsonResponse.pagination) {
-              
-                setTotalPages(jsonResponse.pagination.totalPages);
-                //setPage(jsonResponse.pagination.page)
-                setTotalCount(jsonResponse.pagination.totalCount)
-                setHasNext(jsonResponse.pagination.hasNext)
-                setHasPrev(jsonResponse.pagination.hasPrev)
-                //setCurrentPage(jsonResponse.pagination.page)
-                setIsLoading(false)
-              }
-            });
-    }
+        doSearch();
+        
+        // Cleanup function to abort request on unmount
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort();
+            }
+        };
+    }, [doSearch]);
 
     const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newSearchTerm = e.target.value;
