@@ -1,68 +1,27 @@
 import { NextRequest } from "next/server";
-import { sql, ilike, or, eq } from "drizzle-orm";
-import db from "../../../db";
-import { advocates } from "../../../db/schema";
+import { withErrorHandling } from "../../../lib/api-handler";
+import { createSuccessResponse } from "../../../lib/api-response";
+import { validatePositiveInteger, validatePageSize, validateSearchTerm } from "../../../lib/validation";
+import { searchAdvocates } from "../../../lib/advocate-queries";
 
-export async function GET(request: NextRequest) {
+async function handleGetAdvocates(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const searchTerm = searchParams.get('search_term');
-  const pageSize = parseInt(searchParams.get('page_size') || '10');
-  const page = parseInt(searchParams.get('page') || '1');
 
-  const offset = (page -1) * pageSize
+  // Validate and parse parameters
+  const pageSize = validatePageSize(
+    validatePositiveInteger(searchParams.get('page_size'), 'page_size', 10)
+  );
+  const page = validatePositiveInteger(searchParams.get('page'), 'page', 1);
+  const searchTerm = validateSearchTerm(searchParams.get('search_term'));
 
-  let queryBuilder = db.select().from(advocates);
-  
-  if (searchTerm) {
-    queryBuilder = queryBuilder.where(
-      or(
-        ilike(advocates.firstName, `%${searchTerm}%`),
-        ilike(advocates.lastName, `%${searchTerm}%`),
-        ilike(advocates.city, `%${searchTerm}%`),
-        ilike(advocates.degree, `%${searchTerm}%`),
-        sql`CAST(${advocates.specialties} AS TEXT) ILIKE ${`%${searchTerm}%`}`,
-        isNaN(Number(searchTerm)) 
-          ? sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${'%' + searchTerm + '%'}`
-          : eq(advocates.yearsOfExperience, Number(searchTerm)),
-        sql`CAST(${advocates.phoneNumber} AS TEXT) ILIKE ${`%${searchTerm}%`}`
-      )
-    );
-  }
-  
-  // Add pagination and execute
-  const data = await queryBuilder.limit(pageSize).offset(offset);
-
-
-  // Get total count for pagination metadata
-  let countQuery = db.select({ count: sql<number>`count(*)` }).from(advocates);
-  if (searchTerm) {
-    countQuery = countQuery.where(
-      or(
-        ilike(advocates.firstName, `%${searchTerm}%`),
-        ilike(advocates.lastName, `%${searchTerm}%`),
-        ilike(advocates.city, `%${searchTerm}%`),
-        ilike(advocates.degree, `%${searchTerm}%`),
-        sql`CAST(${advocates.specialties} AS TEXT) ILIKE ${`%${searchTerm}%`}`,
-        isNaN(Number(searchTerm)) 
-          ? sql`CAST(${advocates.yearsOfExperience} AS TEXT) ILIKE ${'%' + searchTerm + '%'}`
-          : eq(advocates.yearsOfExperience, Number(searchTerm)),
-        sql`CAST(${advocates.phoneNumber} AS TEXT) ILIKE ${`%${searchTerm}%`}`
-      )
-    );
-  }
-  
-  const [{ count: totalCount }] = await countQuery;
-  const totalPages = Math.ceil(totalCount / pageSize);
-
-  return Response.json({ 
-    data,
-    pagination: {
-      page,
-      pageSize,
-      totalCount,
-      totalPages,
-      hasNext: page < totalPages,
-      hasPrev: page > 1
-    }
+  // Execute search
+  const result = await searchAdvocates({
+    searchTerm,
+    page,
+    pageSize
   });
+
+  return createSuccessResponse(result);
 }
+
+export const GET = withErrorHandling(handleGetAdvocates);
